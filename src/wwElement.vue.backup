@@ -7,20 +7,20 @@
       @mouseenter="handleMouseEnter"
       @mouseleave="handleMouseLeave"
       @keydown="handleKeyDown"
-      :class="cn('inline-block', triggerClass)"
-      :tabindex="disabled ? -1 : 0"
+      :class="cn('inline-block', content.triggerClass)"
+      :tabindex="content.disabled ? -1 : 0"
     >
       <slot name="trigger">
         <button
           type="button"
-          :disabled="disabled"
+          :disabled="content.disabled"
           :class="cn(
             'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
             'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
             'h-10 px-4 py-2'
           )"
         >
-          {{ triggerText || 'Open Popover' }}
+          {{ content.triggerText || 'Open Popover' }}
         </button>
       </slot>
     </div>
@@ -40,15 +40,15 @@
           'absolute z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none',
           'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
           placementClasses,
-          size === 'sm' && 'w-56 p-3',
-          size === 'lg' && 'w-80 p-6',
-          size === 'xl' && 'w-96 p-6',
-          contentClass
+          content.size === 'sm' && 'w-56 p-3',
+          content.size === 'lg' && 'w-80 p-6',
+          content.size === 'xl' && 'w-96 p-6',
+          content.contentClass
         )"
       >
         <!-- Arrow -->
         <div
-          v-if="showArrow !== false"
+          v-if="content.showArrow !== false"
           :class="cn(
             'absolute h-2 w-2 rotate-45 border bg-popover',
             arrowClasses
@@ -57,7 +57,7 @@
 
         <!-- Close Button -->
         <button
-          v-if="showCloseButton"
+          v-if="content.showCloseButton"
           type="button"
           @click="closePopover"
           :class="cn(
@@ -72,25 +72,25 @@
         </button>
 
         <!-- Header -->
-        <div v-if="title || description" class="grid gap-2">
+        <div v-if="content.title || content.description" class="grid gap-2">
           <h4 
-            v-if="title"
+            v-if="content.title"
             :id="headerId"
             :class="cn(
               'font-medium leading-none',
-              titleClass
+              content.titleClass
             )"
           >
-            {{ title }}
+            {{ content.title }}
           </h4>
           <p 
-            v-if="description"
+            v-if="content.description"
             :class="cn(
               'text-sm text-muted-foreground',
-              descriptionClass
+              content.descriptionClass
             )"
           >
-            {{ description }}
+            {{ content.description }}
           </p>
         </div>
 
@@ -98,23 +98,23 @@
         <div 
           :id="bodyId"
           :class="cn(
-            title || description ? 'mt-2' : '',
-            bodyClass
+            content.title || content.description ? 'mt-2' : '',
+            content.bodyClass
           )"
         >
-          <wwElement v-if="body" v-bind="body" />
+          <wwElement v-if="content.body" v-bind="content.body" />
           <slot v-else></slot>
         </div>
 
         <!-- Footer -->
         <div 
-          v-if="showFooter"
+          v-if="content.showFooter"
           :class="cn(
             'flex items-center justify-end space-x-2 pt-4',
-            footerClass
+            content.footerClass
           )"
         >
-          <wwElement v-if="footer" v-bind="footer" />
+          <wwElement v-if="content.footer" v-bind="content.footer" />
         </div>
       </div>
     </Teleport>
@@ -149,7 +149,7 @@ const hoverTimer = ref(null)
 const headerId = computed(() => `popover-header-${Math.random().toString(36).substr(2, 9)}`)
 const bodyId = computed(() => `popover-body-${Math.random().toString(36).substr(2, 9)}`)
 
-const placement = computed(() => props.placement || 'bottom')
+const placement = computed(() => props.content.placement || 'bottom')
 
 const placementClasses = computed(() => {
   const classes = {
@@ -184,7 +184,7 @@ watch(() => props.modelValue, (newValue) => {
 
 // Methods
 const togglePopover = () => {
-  if (props.disabled) return
+  if (props.content.disabled) return
   
   if (isOpen.value) {
     closePopover()
@@ -194,7 +194,7 @@ const togglePopover = () => {
 }
 
 const openPopover = async () => {
-  if (props.disabled) return
+  if (props.content.disabled) return
   
   isOpen.value = true
   emit('update:modelValue', true)
@@ -216,22 +216,22 @@ const closePopover = () => {
 }
 
 const handleMouseEnter = () => {
-  if (props.trigger === 'hover') {
+  if (props.content.trigger === 'hover') {
     clearTimeout(hoverTimer.value)
     openPopover()
   }
 }
 
 const handleMouseLeave = () => {
-  if (props.trigger === 'hover') {
+  if (props.content.trigger === 'hover') {
     hoverTimer.value = setTimeout(() => {
       closePopover()
-    }, props.hoverDelay || 150)
+    }, props.content.hoverDelay || 150)
   }
 }
 
 const handleKeyDown = (event) => {
-  if (props.disabled) return
+  if (props.content.disabled) return
   
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
@@ -256,7 +256,7 @@ const updatePosition = () => {
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
   
-  const offset = props.offset || 8
+  const offset = props.content.offset || 8
   let top, left
   
   switch (placement.value) {
